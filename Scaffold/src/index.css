@@ -1,0 +1,1068 @@
+@font-face {
+  font-family: 'A-OTF-ANTIQUESTD-ANR';
+  src: url('./assets/fonts/A-OTF-ANTIQUESTD-ANR.OTF') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'A-OTF-ANTIQUESTD-ANL';
+  src: url('./assets/fonts/A-OTF-ANTIQUESTD-ANL.OTF') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SHINKA-REGULAR-TRIAL';
+  src: url('./assets/fonts/SHINKA-REGULAR-TRIAL.TTF') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Design tokens */
+  --font-body: 'SHINKA-REGULAR-TRIAL', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-display: 'A-OTF-ANTIQUESTD-ANR', 'Times New Roman', Georgia, serif;
+  --font-ui: 'A-OTF-ANTIQUESTD-ANR', 'Times New Roman', Georgia, serif;
+  /* B/W scheme */
+  --color-ink: #1f1f1f;
+  --color-ink-muted: #3a3a3a;
+  --color-paper: #f7f7f5;
+  --color-fill: #e6e6e3;
+  --color-panel: #2f3437; /* dark grey (not pure black) for panels */
+  /* Border tokens (defaults follow ink) */
+  --color-border: var(--color-ink);
+  --color-border-muted: var(--color-ink-muted);
+  --radius: 4px;
+  --border-w: 1.5px;
+  /* Texture mask tuning */
+  --grid-texture-blur: 8px; /* ~20% less than 10px */
+  --grid-texture-bleed: 44px;
+  --grid-texture-grain-opacity: 0.12;
+  --grid-texture-grain-size: 240px;
+  /* Detail view sizing token: keeps gallery + side panels consistent; viewport drives size */
+  --detail-media-h: clamp(260px, 38vw, 420px);
+  /* Detail gallery layout tokens (used to align title with gallery frame) */
+  --detail-gallery-nav: clamp(30px, 3vw, 38px);
+  --detail-gallery-gap: clamp(10px, 1.4vw, 18px);
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: var(--color-ink);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-paper);
+  padding: 0;
+}
+
+/* Weather background layer (iframe mini-sites) */
+.weather-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.weather-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.weather-tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 247, 245, 0.4);
+}
+.app-foreground {
+  position: relative;
+  z-index: 1;
+}
+body.weather-on {
+  background-color: transparent;
+}
+body.weather-snow {
+  /* Christmas theme: make the site's ink/borders red (panels already use --color-panel) */
+  /* Text */
+  --color-ink: #1f3b2c;       /* dark green */
+  --color-ink-muted: #1f3b2c; /* same on hover */
+  /* Borders/panels */
+  --color-border: #ca3333;
+  --color-border-muted: #ca3333;
+  --color-panel: #ca3333;
+}
+
+/* Ensure the header rule SVG lines follow theme ink color */
+.header-lines {
+  color: var(--color-ink-muted);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+button {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Prototype header styles */
+.proto-header {
+  position: relative;
+  background-color: transparent;
+  padding: 0 0 1.5rem 0;
+  margin-bottom: 2rem;
+  min-height: 120px; /* ensure content below doesn't overlap header */
+}
+.header-content {
+  position: relative;
+  z-index: 10;
+}
+.header-container {
+  position: relative;
+}
+.header-container::before,
+.header-container::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 20px;
+  width: 1px;
+  background: var(--color-ink-muted);
+}
+.header-container::before {
+  left: 0;   /* Aligns to container's left edge (same as grid) */
+}
+.header-container::after {
+  right: 0;  /* Aligns to container's right edge (same as grid) */
+}
+.header-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.proto-header h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-ink-muted);
+}
+.brand-initials {
+  position: absolute;
+  top: 44px; /* align within the band between header lines (32px–84px) */
+  left: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  display: inline-block;
+}
+.brand-abbr {
+  transition: opacity 120ms ease-in-out;
+}
+.brand-full {
+  position: absolute;   /* overlay exactly on top of J.G. */
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.brand-full .char {
+  opacity: 0;
+  transform: none;      /* no wave movement */
+  display: inline-block;
+}
+.brand-initials:hover { opacity: 0.85; }
+.brand-initials.expanded .brand-abbr { opacity: 0; }
+.brand-initials.expanded .brand-full .char {
+  animation: charFade 180ms ease forwards;
+  animation-delay: calc(var(--i) * 45ms);
+}
+
+.proto-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+.center-menu {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 44px; /* same baseline as initials for alignment */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.weather-toggles {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.weather-toggle {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: var(--border-w) solid var(--color-ink);
+  border-radius: var(--radius);
+  color: var(--color-ink-muted);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.weather-toggle:hover {
+  background: rgba(0,0,0,0.04);
+}
+.weather-toggle.active {
+  background: rgba(0,0,0,0.07);
+  color: var(--color-ink);
+}
+
+/* Fixed overlay typing (non-displacing, left-aligned text near center) */
+.overlay-typing {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-in-out;
+  z-index: 1000;
+}
+.overlay-typing.show { opacity: 1; }
+.overlay-box {
+  width: min(90vw, 1000px);
+  transform: translateY(-10%);
+  text-align: center; /* center in screen */
+}
+.overlay-chars {
+  font-family: var(--font-display);
+  text-align: left;
+  display: inline-block;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+.overlay-chars .char {
+  opacity: 0;
+  transform: none; /* smooth fade, no wave */
+  display: inline-block;
+}
+.overlay-typing.show .overlay-chars .char {
+  animation: charFade 180ms ease forwards;
+  animation-delay: calc(var(--i) * 45ms);
+}
+.overlay-subline {
+  margin-top: 0.2rem;
+  font-size: clamp(20px, 2.9vw, 48px);
+  color: var(--color-ink);
+}
+/* Big centered title/subline with simple fade-in */
+.overlay-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(54px, 13.6vw, 187px);
+  line-height: 0.92;
+  color: var(--color-ink);
+  opacity: 0;
+}
+.overlay-typing.show .overlay-title {
+  animation: overlayFade 220ms ease forwards;
+}
+.overlay-typing.show .overlay-subline {
+  opacity: 0;
+  animation: overlayFade 220ms ease forwards;
+  animation-delay: 120ms;
+}
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes charIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes charFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.proto-nav-button {
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  padding: 0.5rem 1rem;
+  border: var(--border-w) solid var(--color-border);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 13px;
+  text-align: left;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s, box-shadow 0.2s, transform 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: var(--radius);
+}
+.proto-nav-button:hover {
+  background-color: rgba(47,63,67,0.12);
+  border-color: var(--color-border-muted);
+  color: var(--color-ink); /* prevent global a:hover blue */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  opacity: 1;
+}
+.proto-nav-button:active { transform: translateY(0); background-color: rgba(47,63,67,0.18); }
+
+/* Hover overlay with typewriter name */
+.name-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+  z-index: 1000;
+}
+.name-overlay.show { opacity: 1; }
+.name-block {
+  text-align: center;
+  color: var(--color-ink);
+  line-height: 1.1;
+  padding: 1rem 2rem;
+}
+.type-line {
+  font-family: var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid rgba(47,63,67,0.5);
+  width: 0ch;
+  animation: typing var(--duration) steps(var(--chars)) forwards, blink 0.8s step-end infinite;
+}
+.name-line {
+  font-size: clamp(36px, 8vw, 96px);
+  margin-bottom: 0.35em;
+}
+.location-line {
+  font-size: clamp(18px, 3.6vw, 40px);
+  border-right-width: 1px;
+}
+@keyframes typing {
+  from { width: 0ch; }
+  to { width: var(--chars); }
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* Filter styles to match prototype */
+.filter-section {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-media {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+.filter-button {
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  padding: 0.5rem 1rem;
+  border: var(--border-w) solid var(--color-border);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 11px;
+  text-align: left;
+  border-radius: var(--radius);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s, box-shadow 0.2s, transform 0.15s ease;
+}
+.filter-button:hover {
+  background-color: rgba(47,63,67,0.12);
+  border-color: var(--color-border-muted);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.filter-button:active { transform: translateY(0); background-color: rgba(47,63,67,0.18); }
+.filter-button.active {
+  background-color: var(--color-ink-muted);
+  color: var(--color-paper);
+  border-color: var(--color-border-muted);
+}
+/* Slightly darken filled button on hover for stronger feedback */
+.filter-button.active:hover {
+  background-color: #405154;
+  border-color: #405154;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+/* Persistently clicked memory state */
+.filter-button.visited {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.filter-button.visited:hover {
+  background-color: rgba(47,63,67,0.12);
+  border-color: #3b4e52;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.filter-button.active.visited {
+  background-color: var(--color-ink-muted);
+  color: var(--color-paper);
+  border-color: var(--color-border-muted);
+  box-shadow: none;
+}
+.filter-button.active.visited:hover {
+  background-color: #405154;
+  border-color: #405154;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ProjectGrid styles */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  /* Keep the “1920px looks perfect” spacing, but let gaps shrink on narrower viewports
+     so the grid doesn’t look overly spaced-out when cells get smaller. */
+  gap: clamp(10px, 1.25vw, 1.5rem);
+}
+.project-grid .grid-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  opacity: 0;
+  transform: scale(1.5);
+  transition: transform 0.2s, opacity 0.2s;
+}
+.project-grid .grid-cell.visible {
+  animation: fallIn 0.42s ease-in-out forwards;
+}
+@keyframes fallIn {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.project-grid .grid-cell.empty {
+  background: transparent;
+}
+.project-grid .grid-cell.outline {
+  background: transparent;
+  border: var(--border-w) solid var(--color-ink-muted);
+}
+.project-grid .grid-cell.outline:hover {
+  background-color: rgba(71, 89, 93, 0.1);
+  cursor: pointer;
+}
+.project-grid .grid-cell.solid {
+  background-color: var(--color-fill);
+}
+
+/* BG texture mask: show a blurred background image through the grey "solid" cells */
+.project-grid .grid-cell.texture-cell {
+  position: relative;
+  overflow: hidden;
+  border: none !important;
+}
+
+/* Snow decorations (SVGs placed into specific grid cells) */
+.project-grid .grid-cell.decor-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  overflow: visible;
+}
+.project-grid .grid-cell.decor-cell .grid-decoration {
+  width: 90%;
+  height: 90%;
+  display: block;
+  object-fit: contain;
+  transform: translateY(-12%);
+  pointer-events: auto;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+}
+.project-grid .grid-cell.decor-cell .grid-decoration:hover {
+  transform: translateY(-12%) scale(1.10);
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6)) brightness(1.15);
+}
+
+/* Snow easter egg overlay */
+.snow-void-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #060607;
+  cursor: grab;
+}
+.snow-void-overlay:active {
+  cursor: grabbing;
+}
+.snow-void-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.project-grid .grid-cell.texture-cell::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--grid-texture-bleed)); /* blur bleed */
+  background-image: var(--tex-image);
+  background-repeat: no-repeat;
+  background-size: var(--tex-size-x) var(--tex-size-y);
+  background-position: var(--tex-pos-x) var(--tex-pos-y);
+  filter: blur(var(--grid-texture-blur));
+  transform: scale(1.01);
+  opacity: 0.95;
+  pointer-events: none;
+  z-index: 0;
+}
+.project-grid .grid-cell.texture-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Grain overlay (subtle) */
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='220'%20height='220'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='.85'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='220'%20height='220'%20filter='url(%23n)'%20opacity='.55'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: var(--grid-texture-grain-size) var(--grid-texture-grain-size);
+  opacity: var(--grid-texture-grain-opacity);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+.project-grid .grid-cell.texture-cell > * {
+  position: relative;
+  z-index: 1;
+}
+.project-grid .grid-cell.solid:not(.texture-cell):hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+.project-grid .grid-cell.project {
+  background-color: var(--color-fill);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+.project-grid .grid-cell.project:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+.project-grid .grid-cell.project::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(71, 89, 93, 0);
+  transition: background 0.2s;
+}
+.project-grid .grid-cell.project:hover::after {
+  background: rgba(71, 89, 93, 0.2);
+}
+.project-grid .thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Shimmer only until image loads */
+.project-grid .grid-cell.project:not(.media-loaded)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 100%);
+  transform: translateX(-100%);
+  animation: shimmer 1.2s infinite;
+}
+.project-grid .grid-cell.media-loaded::before { display: none; }
+
+/* Project detail view (replaces overlay popup) */
+.project-detail {
+  animation: pageIn 220ms ease-out both;
+}
+
+.project-detail-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.ui-button {
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  padding: 0.45rem 0.9rem;
+  border: var(--border-w) solid var(--color-border);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 12px;
+  border-radius: var(--radius);
+  transition: background-color 0.2s, transform 0.15s ease, box-shadow 0.2s, border-color 0.2s;
+}
+.ui-button:hover {
+  background-color: rgba(47,63,67,0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.ui-button:active { transform: translateY(0); background-color: rgba(47,63,67,0.18); }
+
+.project-detail-layout {
+  display: grid;
+  /* Give the title room so it doesn’t collide with side boxes on narrower viewports */
+  /* Keep side panels from ballooning, give the center room, and add enough breathing space
+     so large display glyph overhangs don't visually collide with the side cards. */
+  grid-template-columns: minmax(220px, 320px) minmax(420px, 1fr) minmax(220px, 320px);
+  gap: clamp(18px, 3vw, 44px);
+  /* Stretch items so row 2 panels match the gallery height */
+  align-items: stretch;
+}
+
+.project-detail-side {
+  display: flex;
+  /* Center the side stacks inside their side columns so the gutter to the gallery
+     is visually mirrored on both sides. */
+  justify-content: center;
+}
+
+.project-detail-prev { grid-column: 1; grid-row: 1; }
+.project-detail-head { grid-column: 2; grid-row: 1; }
+.project-detail-next { grid-column: 3; grid-row: 1; }
+.project-detail-description { grid-column: 1; grid-row: 2; }
+.project-detail-content { grid-column: 2; grid-row: 2; }
+.project-detail-content {
+  /* The gallery frame is laid out internally (prev | frame | next).
+     Remove the center-column padding so the frame’s border aligns with the title. */
+  padding-inline: 0;
+}
+.project-detail-credits { grid-column: 3; grid-row: 2; }
+
+.project-detail-prev,
+.project-detail-head,
+.project-detail-next {
+  align-self: start;
+}
+
+.project-detail-nav {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  padding: clamp(10px, 1.1vw, 12px);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.15s ease, box-shadow 0.2s;
+}
+.project-detail-nav:hover {
+  background-color: rgba(47,63,67,0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.project-detail-nav.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.project-detail-navLabel {
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 0.9vw, 11px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.project-detail-navTitle {
+  margin-top: 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.55vw, 20px);
+  line-height: 1.1;
+}
+
+.project-detail-panel {
+  width: 100%;
+  max-width: 280px;
+  padding: clamp(10px, 1.1vw, 12px);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius);
+  /* Invert panels: blue fill with light text, but keep border for alignment */
+  background: var(--color-panel);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Make side panels match the gallery height (row 2) and allow scrolling inside */
+.project-detail-description .project-detail-panel,
+.project-detail-credits .project-detail-panel {
+  height: var(--detail-media-h);
+}
+.project-detail-panelLabel {
+  font-family: var(--font-ui);
+  /* Panel header (Description/Credits) */
+  font-size: clamp(11px, 1.05vw, 13px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  opacity: 0.8;
+}
+.project-detail-panelBody {
+  margin-top: 0.45rem;
+  font-size: clamp(11px, 1.05vw, 13px);
+  line-height: 1.6;
+  color: var(--color-paper);
+  /* Allow the full text with a scrollbar when needed */
+  overflow: auto;
+  flex: 1;
+  padding-right: 6px; /* room for scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(245,245,245,0.35) rgba(0,0,0,0);
+}
+
+/* WebKit scrollbar styling (Chrome/Edge/Safari) */
+.project-detail-panelBody::-webkit-scrollbar {
+  width: 10px;
+}
+.project-detail-panelBody::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0);
+}
+.project-detail-panelBody::-webkit-scrollbar-thumb {
+  background-color: rgba(245,245,245,0.28);
+  border-radius: 999px;
+  border: 2px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+}
+.project-detail-panelBody::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(245,245,245,0.4);
+}
+
+/* Credits key/value formatting */
+.project-detail-credits .project-detail-panelBody {
+  /* Credits rows slightly smaller than the "CREDITS" header */
+  font-size: clamp(10px, 0.95vw, 12px);
+  /* Natural spacing: rows expand based on content; no forced blank space */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.project-detail-creditsRow {
+  display: grid;
+  grid-template-columns: 8ch 1fr; /* fixed label column (YEAR:, AUTHOR:, etc.) */
+  column-gap: 12px;
+  row-gap: 0;
+  align-items: baseline;
+}
+.project-detail-creditsKey {
+  font-family: var(--font-ui);
+  /* Same size as value text (size inherited from parent) */
+  font-size: 1em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  opacity: 0.8; /* same tone as "CREDITS" label */
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.project-detail-creditsValue {
+  font-size: 1em;
+  line-height: 1.5;
+  color: var(--color-paper);
+  opacity: 0.95;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.project-detail-center {
+  padding: 0.25rem 0;
+  /* Extra padding keeps the title's glyph overhang from visually touching side cards */
+  padding-inline: clamp(8px, 1.4vw, 18px);
+}
+.project-detail-center.project-detail-content {
+  /* Override the base center padding so the gallery frame aligns with the title */
+  padding-inline: 0;
+}
+.project-detail-head {
+  /* Align title top with prev/next cards */
+  padding-top: 0;
+  /* Align title left edge to the gallery frame (not the left nav button slot) */
+  padding-left: calc(var(--detail-gallery-nav) + var(--detail-gallery-gap));
+  padding-right: calc(var(--detail-gallery-nav) + var(--detail-gallery-gap));
+}
+.project-detail-title {
+  margin: 0 0 0.5rem 0;
+  /* Prevent massive titles from visually “crashing into” prev/next cards */
+  font-size: clamp(24px, 3.1vw, 48px);
+  line-height: 0.96;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.project-detail-meta {
+  color: var(--color-ink-muted);
+  font-size: clamp(11px, 1vw, 12px);
+  letter-spacing: 0.02em;
+}
+.project-detail-dot { padding: 0 0.35rem; }
+.project-detail-body {
+  margin-top: 1rem;
+  font-size: clamp(13px, 1.25vw, 15px);
+  line-height: 1.7;
+}
+
+.project-detail-gallery {
+  /* Row 2 aligns panels + gallery; avoid extra top margin that visually shrinks the gallery */
+  margin-top: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: var(--detail-gallery-gap);
+  height: var(--detail-media-h);
+  box-sizing: border-box;
+}
+.project-detail-galleryFrame { cursor: zoom-in; }
+
+.project-detail-galleryFrame {
+  grid-column: 2;
+}
+.project-detail-gallery .prev-button { grid-column: 1; }
+.project-detail-gallery .next-button { grid-column: 3; }
+
+.project-detail-gallery.is-overlay,
+.project-detail-gallery:fullscreen {
+  margin-top: 0;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: rgba(0,0,0,0.9);
+  padding: clamp(16px, 2.4vw, 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.project-detail-gallery.is-overlay .project-detail-galleryFrame,
+.project-detail-gallery:fullscreen .project-detail-galleryFrame {
+  grid-column: auto;
+  width: min(94vw, 1400px);
+  height: min(92vh, 900px);
+  border-color: rgba(245,245,245,0.7);
+  background: transparent;
+  cursor: zoom-out;
+}
+.project-detail-gallery.is-overlay .project-detail-galleryImage,
+.project-detail-gallery:fullscreen .project-detail-galleryImage {
+  width: 100%;
+  height: 100%;
+}
+.project-detail-gallery.is-overlay .nav-button,
+.project-detail-gallery:fullscreen .nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-color: rgba(245,245,245,0.9);
+  color: rgba(245,245,245,0.95);
+  background: rgba(0,0,0,0.35);
+}
+.project-detail-gallery.is-overlay .nav-button:hover,
+.project-detail-gallery:fullscreen .nav-button:hover {
+  background: rgba(0,0,0,0.5);
+}
+.project-detail-galleryClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10000;
+  border-color: rgba(245,245,245,0.9);
+  color: rgba(245,245,245,0.95);
+  background: rgba(0,0,0,0.35);
+}
+.project-detail-galleryClose:hover {
+  background: rgba(0,0,0,0.5);
+}
+.project-detail-gallery .nav-button {
+  /* Override legacy .nav-button styles from App.css (position: absolute, transforms, etc.) */
+  position: static;
+  transform: none;
+  width: var(--detail-gallery-nav);
+  height: var(--detail-gallery-nav);
+  padding: 0;
+  border-radius: var(--radius);
+  border: var(--border-w) solid var(--color-border);
+  background: rgba(247,247,245,0.92);
+  color: var(--color-ink);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: clamp(12px, 1.3vw, 16px);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.project-detail-gallery .nav-button:hover { background: rgba(247,247,245,1); }
+.project-detail-gallery .nav-button:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+.project-detail-gallery .nav-button:focus-visible {
+  outline: 2px solid rgba(0,0,0,0.35);
+  outline-offset: 2px;
+}
+
+.project-detail-gallery.is-overlay .prev-button,
+.project-detail-gallery:fullscreen .prev-button { left: 14px; }
+.project-detail-gallery.is-overlay .next-button,
+.project-detail-gallery:fullscreen .next-button { right: 14px; }
+
+/* In fullscreen/overlay modes, the arrows should be overlayed on the sides */
+.project-detail-gallery.is-overlay .nav-button,
+.project-detail-gallery:fullscreen .nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.project-detail-gallery.is-overlay .nav-button:hover,
+.project-detail-gallery:fullscreen .nav-button:hover {
+  transform: translateY(-50%);
+}
+
+.project-detail-galleryFrame {
+  width: 100%;
+  height: 100%;
+  border: var(--border-w) solid var(--color-border-muted);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.project-detail-galleryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 980px) {
+  .project-detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .project-detail-side {
+    justify-content: flex-start;
+  }
+
+  /* In stacked mode, side stacks should use the full width */
+  .project-detail-nav,
+  .project-detail-panel {
+    max-width: none;
+  }
+
+  .project-detail-center {
+    padding-inline: 0;
+  }
+
+  .project-detail-prev,
+  .project-detail-head,
+  .project-detail-next,
+  .project-detail-description,
+  .project-detail-content,
+  .project-detail-credits {
+    grid-column: 1;
+  }
+  .project-detail-prev { grid-row: 1; }
+  .project-detail-description { grid-row: 2; }
+  .project-detail-head { grid-row: 3; }
+  .project-detail-content { grid-row: 4; }
+  .project-detail-next { grid-row: 5; }
+  .project-detail-credits { grid-row: 6; }
+
+  /* On small screens, don't force a huge fixed-height panel; let it grow naturally */
+  .project-detail-description .project-detail-panel,
+  .project-detail-credits .project-detail-panel,
+  .project-detail-gallery {
+    height: auto;
+  }
+
+  .project-detail-panelBody { max-height: 260px; }
+}
