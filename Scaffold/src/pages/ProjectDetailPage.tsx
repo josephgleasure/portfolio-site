@@ -8,6 +8,11 @@ const ProjectDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const fallbackImageUrl = useMemo(
+    () => new URL('../assets/projects/fallback.jpg', import.meta.url).href,
+    []
+  );
+
   const projectId = String(id);
   const project = String(projectId) ? findProjectById(projectId) : undefined;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -15,16 +20,30 @@ const ProjectDetailPage: React.FC = () => {
   const [isGalleryOverlayOpen, setIsGalleryOverlayOpen] = useState(false);
   const [isGalleryFullscreen, setIsGalleryFullscreen] = useState(false);
 
-  const ordered = useMemo(() => [...projects].sort((a, b) => a.id - b.id), []);
-  const index = useMemo(() => ordered.findIndex(p => p.id === projectId), [ordered, projectId]);
+  // Keep nav order the same as your `projects` array.
+  const ordered = useMemo(() => [...projects], []);
+  const index = useMemo(() => ordered.findIndex((p) => p.id === projectId), [ordered, projectId]);
 
   const prev = index > 0 ? ordered[index - 1] : undefined;
   const next = index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : undefined;
 
   const imageUrls = useMemo(() => {
     if (!project) return [];
+
+    // Preferred: explicit media list for media projects
+    if (project.type === 'media') {
+      if (Array.isArray(project.media) && project.media.length > 0) return project.media;
+
+      const folderUrls = getImageUrlsForTitle(project.title);
+      if (folderUrls.length > 0) return folderUrls;
+
+      // Media project but no media yet: show placeholder
+      return [fallbackImageUrl];
+    }
+
+    // Text projects: optional folder images, otherwise no gallery
     return getImageUrlsForTitle(project.title);
-  }, [project]);
+  }, [fallbackImageUrl, project]);
   const hasImages = imageUrls.length > 0;
 
   // Reset gallery index when changing projects
@@ -270,20 +289,36 @@ const ProjectDetailPage: React.FC = () => {
             <div className="project-detail-panelLabel">Credits</div>
             <div className="project-detail-panelBody">
               <div className="project-detail-creditsRow">
-                <span className="project-detail-creditsKey">Year:</span>
-                <span className="project-detail-creditsValue">{project.publicationYear}</span>
-              </div>
-              <div className="project-detail-creditsRow">
-                <span className="project-detail-creditsKey">Author:</span>
-                <span className="project-detail-creditsValue">{project.author}</span>
-              </div>
-              <div className="project-detail-creditsRow">
                 <span className="project-detail-creditsKey">ID:</span>
                 <span className="project-detail-creditsValue">{project.id}</span>
               </div>
               <div className="project-detail-creditsRow">
-                <span className="project-detail-creditsKey">ISBN:</span>
-                <span className="project-detail-creditsValue">{String(project.isbn)}</span>
+                <span className="project-detail-creditsKey">Type:</span>
+                <span className="project-detail-creditsValue">{project.type}</span>
+              </div>
+              <div className="project-detail-creditsRow">
+                <span className="project-detail-creditsKey">Tags:</span>
+                <span className="project-detail-creditsValue">
+                  {Array.isArray(project.tags) && project.tags.length ? project.tags.join(', ') : '—'}
+                </span>
+              </div>
+
+              <div className="project-detail-creditsRow" style={{ marginTop: 10 }}>
+                <span className="project-detail-creditsKey">Credits:</span>
+                <span className="project-detail-creditsValue">
+                  {Array.isArray(project.credits) && project.credits.length ? (
+                    <span>
+                      {project.credits.map((c, i) => (
+                        <span key={`${c.role}-${c.name}-${i}`}>
+                          {c.role}: {c.name}
+                          {i < project.credits!.length - 1 ? ' · ' : ''}
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
+                    '—'
+                  )}
+                </span>
               </div>
             </div>
           </div>

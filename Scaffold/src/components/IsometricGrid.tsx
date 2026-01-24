@@ -19,13 +19,8 @@ const TILE_SIZE = 72; // px
 const TILE_GAP = 14; // px
 
 const getStampUrl = (id: string) => {
-  try {
-    // Try to load the ID-specific thumbnail
-    return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
-  } catch {
-    // Fallback if the above fails (e.g., missing file)
-    return new URL(`../assets/thumbnails/fallback.jpg`, import.meta.url).href;
-  }
+  // This may 404 if the specific thumbnail doesn't exist; we swap to a real fallback in onError.
+  return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
 };
 
 export const IsometricGrid: React.FC<IsometricGridProps> = ({
@@ -38,6 +33,10 @@ export const IsometricGrid: React.FC<IsometricGridProps> = ({
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [visibleHeight, setVisibleHeight] = useState(0);
+  const fallbackThumbUrl = useMemo(
+    () => new URL(`../assets/projects/fallback.jpg`, import.meta.url).href,
+    []
+  );
 
   // Compute the maximum number of columns across rows (including their offsets)
   const maxColumns = useMemo(() => {
@@ -106,6 +105,11 @@ export const IsometricGrid: React.FC<IsometricGridProps> = ({
                       className="thumb"
                       loading="lazy"
                       onLoad={(e) => e.currentTarget.classList.add('loaded')}
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        img.onerror = null; // prevent loops
+                        img.src = fallbackThumbUrl;
+                      }}
                     />
                   ) : (
                     <div className="empty-cell" />

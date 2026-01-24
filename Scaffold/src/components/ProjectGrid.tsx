@@ -25,11 +25,8 @@ const gridMask: ("empty" | "outline" | "solid" | "project")[][] = [
 ];
 
 const getThumbUrl = (id: string) => {
-  try {
-    return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
-  } catch {
-    return new URL(`../assets/thumbnails/fallback.jpg`, import.meta.url).href;
-  }
+  // This may 404 if the specific thumbnail doesn't exist; we swap to a real fallback in onError.
+  return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
 };
 
 const ProjectGrid: React.FC<ProjectGridProps> = ({
@@ -41,6 +38,10 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
 }) => {
   const navigate = useNavigate();
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const fallbackThumbUrl = useMemo(
+    () => new URL(`../assets/projects/fallback.jpg`, import.meta.url).href,
+    []
+  );
 
   const [gridSize, setGridSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [cellOffsets, setCellOffsets] = useState<Map<string, { x: number; y: number }>>(new Map());
@@ -266,8 +267,12 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
                       if (parent) parent.classList.add("media-loaded");
                     }}
                     onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const parent = e.currentTarget.parentElement;
+                      // Swap to a guaranteed-present placeholder, instead of hiding.
+                      const img = e.currentTarget;
+                      img.onerror = null; // prevent loops
+                      img.src = fallbackThumbUrl;
+                      img.style.display = "";
+                      const parent = img.parentElement;
                       if (parent) parent.classList.add("media-error");
                     }}
                   />
