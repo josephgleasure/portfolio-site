@@ -7,7 +7,16 @@ import needsEvals from "./needs-evals/project";
 import levisICD from "./levis-icd/project";
 import announcingIndexify from "./announcing-Indexify/project";
 
-export const projects = [visionTools, losingMyHands];
+export const projects = [
+  visionTools,
+  losingMyHands,
+  hiringMLEs,
+  yearOfLLMs,
+  dataFlywheels,
+  needsEvals,
+  levisICD,
+  announcingIndexify,
+];
 
 export const findProjectById = (id: string) =>
   projects.find((p) => p.id === id);

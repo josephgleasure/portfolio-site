@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useNavigate } from "react-router-dom";
 
 interface ProjectGridProps {
-  stamps: { id: string; name: string }[];
+  stamps: Array<{ id: string; name: string } | null>;
   backgroundTextureUrl?: string | null;
   snowPresentUrls?: [string, string];
   snowSeed?: number;
@@ -21,15 +21,12 @@ const gridMask: ("empty" | "outline" | "solid" | "project")[][] = [
   ["outline", "empty", "empty", "outline", "solid", "project", "solid", "project", "solid", "outline", "empty", "empty"],
   ["empty", "outline", "project", "project", "solid", "solid", "project", "empty", "solid", "project", "outline", "empty"],
   ["empty", "solid", "solid", "project", "project", "solid", "project", "solid", "project", "solid", "project", "solid"],
-  ["empty", "outline", "empty", "project", "solid", "project", "outline", "solid", "project", "solid", "project", "outline"],
+  ["empty", "outline", "project", "project", "solid", "project", "outline", "solid", "project", "solid", "project", "outline"],
 ];
 
 const getThumbUrl = (id: string) => {
-  try {
-    return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
-  } catch {
-    return new URL(`../assets/thumbnails/fallback.jpg`, import.meta.url).href;
-  }
+  // This may 404 if the specific thumbnail doesn't exist; we swap to a real fallback in onError.
+  return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
 };
 
 const ProjectGrid: React.FC<ProjectGridProps> = ({
@@ -41,6 +38,10 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
 }) => {
   const navigate = useNavigate();
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const fallbackThumbUrl = useMemo(
+    () => new URL(`../assets/projects/fallback.jpg`, import.meta.url).href,
+    []
+  );
 
   const [gridSize, setGridSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [cellOffsets, setCellOffsets] = useState<Map<string, { x: number; y: number }>>(new Map());
@@ -179,6 +180,10 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
 
           const slotIdx = baseType === "project" ? slotIndexByCell.get(`${r}-${c}`) : undefined;
           const cellStamp = slotIdx != null ? stamps[slotIdx] ?? null : null;
+          // Any project slot without a stamp (filtered-out or "future") should render as a light outline,
+          // and still participate in the grid load animation.
+          const isEmptyProjectSlot = baseType === "project" && !cellStamp;
+          const renderType = isEmptyProjectSlot ? "outline" : baseType;
 
           // Texture applies only to SOLID cells
           const isTextureCell = Boolean(backgroundTextureUrl) && baseType === "solid";
@@ -212,8 +217,9 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
           // Important: only mark non-empty cells as "visible"
           const classNames = [
             "grid-cell",
-            baseType,
-            baseType !== "empty" ? "visible" : "",
+            renderType,
+            renderType !== "empty" ? "visible" : "",
+            isEmptyProjectSlot ? "empty-project-slot" : "",
             isTextureCell ? "texture-cell" : "",
             isDecorationCell ? "decor-cell" : "",
           ]
@@ -266,12 +272,15 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
                       if (parent) parent.classList.add("media-loaded");
                     }}
                     onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const parent = e.currentTarget.parentElement;
+                      // Swap to a guaranteed-present placeholder, instead of hiding.
+                      const img = e.currentTarget;
+                      img.onerror = null; // prevent loops
+                      img.src = fallbackThumbUrl;
+                      img.style.display = "";
+                      const parent = img.parentElement;
                       if (parent) parent.classList.add("media-error");
                     }}
                   />
-                  <div className="thumb-fallback">{cellStamp.name}</div>
                 </div>
               ) : null}
             </div>
