@@ -10,7 +10,7 @@ const AboutPage = () => {
       <p>
         <em>
           I am a writer who specializes in art, design, and technology. I have
-          created immersive branding experiences for C.P. Company, Puma, New Balance,
+          created immersive branding experiences for C.P. Company, Puma, New Balance, Reebok,
           Lacoste, Dr Martens, Tombogo, Terminal 27, Vooglam, Wondershare Filmora, and more.
         </em>
       </p>
