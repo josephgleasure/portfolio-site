@@ -6,8 +6,8 @@ const project: Project = {
   type: "media",
 
   tags: ["Fashion"],
-  description: `  by Terminal 27 to profile the emerging Korean fashion scene through interviews with rising brands CMMAWEAR and FFFPOSTALSERVICE. I conducted an hour-long conversation with designers Giz Moon and Jonathan Choe, exploring their influences, design philosophies, and aspirations while documenting their day navigating Seoul's garment districts, food markets, and contemporary architecture.
-  
+  description: `I was invited by Terminal 27 to profile the emerging Korean fashion scene through interviews with rising brands CMMAWEAR and FFFPOSTALSERVICE. I conducted an hour-long conversation with designers Giz Moon and Jonathan Choe, exploring their influences, design philosophies, and aspirations while documenting their day navigating Seoul's garment districts, food markets, and contemporary architecture.
+
  
   The piece examines how a new generation of Korean designers is challenging the traditional fashion hierarchy, moving beyond Korea's fast-fashion associations to establish an independent design identity that embraces technological optimism and challenges the nostalgia-driven trends dominating contemporary menswear.
 `,

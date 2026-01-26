@@ -17,8 +17,11 @@ const ProjectDetailPage: React.FC = () => {
   const project = String(projectId) ? findProjectById(projectId) : undefined;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const galleryRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isGalleryOverlayOpen, setIsGalleryOverlayOpen] = useState(false);
   const [isGalleryFullscreen, setIsGalleryFullscreen] = useState(false);
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
   // Keep nav order the same as your `projects` array.
   const ordered = useMemo(() => [...projects], []);
@@ -46,10 +49,28 @@ const ProjectDetailPage: React.FC = () => {
   }, [fallbackImageUrl, project]);
   const hasImages = imageUrls.length > 0;
 
+  // Helper to check if a URL is a video file
+  const isVideo = (url: string): boolean => {
+    return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+  };
+
   // Reset gallery index when changing projects
   useEffect(() => {
     setCurrentImageIndex(0);
+    setImageAspectRatio(null); // Reset aspect ratio when changing projects
   }, [projectId]);
+
+  // Reset aspect ratio when image index changes (will be recalculated on image load)
+  // Also pause any playing video when navigating
+  useEffect(() => {
+    setImageAspectRatio(null);
+    // Pause and reset video if it exists and we're switching away from a video
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      videoRef.current.load(); // Force reload for new source
+    }
+  }, [currentImageIndex, imageUrls]);
 
   // Keep in sync with native fullscreen state (if supported)
   useEffect(() => {
@@ -58,6 +79,16 @@ const ProjectDetailPage: React.FC = () => {
     };
     document.addEventListener('fullscreenchange', onFsChange);
     return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  // Track viewport size for fullscreen calculations
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   // If we're using overlay fallback, prevent background scrolling
@@ -71,6 +102,28 @@ const ProjectDetailPage: React.FC = () => {
   }, [isGalleryOverlayOpen]);
 
   const isGalleryOpen = isGalleryOverlayOpen || isGalleryFullscreen;
+
+  // Calculate fullscreen frame dimensions based on image aspect ratio
+  const fullscreenFrameStyle = useMemo(() => {
+    if (!isGalleryOpen || !imageAspectRatio) return undefined;
+    
+    const maxWidth = Math.min(viewportSize.width * 0.94, 1400);
+    const maxHeight = Math.min(viewportSize.height * 0.92, 900);
+    
+    // Calculate dimensions that fit within max constraints while maintaining aspect ratio
+    let width = maxWidth;
+    let height = width / imageAspectRatio;
+    
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * imageAspectRatio;
+    }
+    
+    return {
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+  }, [isGalleryOpen, imageAspectRatio, viewportSize]);
 
   const exitGalleryFullscreen = async () => {
     if (isGalleryOverlayOpen) setIsGalleryOverlayOpen(false);
@@ -229,7 +282,7 @@ const ProjectDetailPage: React.FC = () => {
             <div
               ref={galleryRef}
               className={`project-detail-gallery${isGalleryOverlayOpen ? ' is-overlay' : ''}`}
-              aria-label="Project gallery (double-click to toggle fullscreen)"
+              aria-label="Project gallery (click to toggle fullscreen)"
             >
               {isGalleryOpen ? (
                 <button
@@ -251,13 +304,50 @@ const ProjectDetailPage: React.FC = () => {
                 ←
               </button>
 
-              <div className="project-detail-galleryFrame" onDoubleClick={toggleGalleryFullscreen}>
-                <img
-                  src={imageUrls[currentImageIndex]}
-                  alt={`${project.title} image ${currentImageIndex + 1}`}
-                  className="project-detail-galleryImage"
-                  loading="lazy"
-                />
+              <div 
+                className="project-detail-galleryFrame" 
+                onClick={toggleGalleryFullscreen}
+                style={fullscreenFrameStyle}
+              >
+                {isVideo(imageUrls[currentImageIndex]) ? (
+                  <video
+                    key={imageUrls[currentImageIndex]}
+                    ref={videoRef}
+                    src={imageUrls[currentImageIndex]}
+                    className="project-detail-galleryImage"
+                    controls
+                    playsInline
+                    muted
+                    loop
+                    autoPlay
+                    preload="metadata"
+                    onLoadedMetadata={(e) => {
+                      const video = e.currentTarget;
+                      const aspectRatio = video.videoWidth / video.videoHeight;
+                      setImageAspectRatio(aspectRatio);
+                    }}
+                    onError={(e) => {
+                      console.error('Video failed to load:', imageUrls[currentImageIndex]);
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <img
+                    key={imageUrls[currentImageIndex]}
+                    src={imageUrls[currentImageIndex]}
+                    alt={`${project.title} image ${currentImageIndex + 1}`}
+                    className="project-detail-galleryImage"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      const aspectRatio = img.naturalWidth / img.naturalHeight;
+                      setImageAspectRatio(aspectRatio);
+                    }}
+                    onError={(e) => {
+                      console.error('Image failed to load:', imageUrls[currentImageIndex]);
+                    }}
+                  />
+                )}
               </div>
 
               <button

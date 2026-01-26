@@ -659,7 +659,7 @@ button:focus-visible {
 }
 
 /* Shimmer only until image loads */
-.project-grid .grid-cell.project:not(.media-loaded)::before {
+.project-grid .grid-cell.project:not(.media-loaded):not(.media-error)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -668,7 +668,14 @@ button:focus-visible {
   transform: translateX(-100%);
   animation: shimmer 1.2s infinite;
 }
-.project-grid .grid-cell.media-loaded::before { display: none; }
+.project-grid .grid-cell.media-loaded::before,
+.project-grid .grid-cell.media-error::before { display: none; }
+
+/* Disable animations on error cells */
+.project-grid .grid-cell.media-error {
+  animation: none !important;
+  animation-delay: 0ms !important;
+}
 
 /* Project detail view (replaces overlay popup) */
 .project-detail {
@@ -1003,8 +1010,9 @@ button:focus-visible {
 .project-detail-gallery.is-overlay .project-detail-galleryFrame,
 .project-detail-gallery:fullscreen .project-detail-galleryFrame {
   grid-column: auto;
-  width: min(94vw, 1400px);
-  height: min(92vh, 900px);
+  /* Width and height will be set dynamically via inline styles based on image aspect ratio */
+  /* aspect-ratio is removed in fullscreen to allow dynamic sizing */
+  aspect-ratio: unset;
   border-color: rgba(245,245,245,0.7);
   background: transparent;
   cursor: zoom-out;
@@ -1086,8 +1094,12 @@ button:focus-visible {
 }
 
 .project-detail-galleryFrame {
-  width: 100%;
+  /* Maintain 4:5 aspect ratio (portrait) in project view */
+  /* Constrain to fit within parent container height */
   height: 100%;
+  width: auto;
+  aspect-ratio: 4 / 5;
+  max-width: 100%;
   border: var(--border-w) solid var(--color-border-muted);
   border-radius: var(--radius);
   overflow: hidden;
@@ -1096,8 +1108,18 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  margin: 0 auto; /* Center horizontally */
 }
 .project-detail-galleryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Video elements in gallery */
+.project-detail-galleryFrame video {
   display: block;
   width: 100%;
   height: 100%;

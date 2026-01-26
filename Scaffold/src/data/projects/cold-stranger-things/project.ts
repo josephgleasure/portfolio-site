@@ -1,12 +1,12 @@
 import type { Project } from "../types";
 //THIS IS AN EXAMPLE OF A TEXT PROJECT,CLONE THIS FILE AND MODIFY THE CONTENT TO CREATE A NEW TEXT PROJECT
 const project: Project = {
-  id: "announcing-Indexify",
-  title: "Announcing Indexify",
-  type: "text",
+  id: "cold-stranger-things",
+  title: "Did ‘Stranger Things’ Help Nerds Win the Culture War?",
+  type: "media",
 
-  //thumbnail: "/media/projects/losing-my-hands/thumb.jpg",
-  tags: ["AI", "Personal"],
+
+  tags: ["Fashion"],
   description: ` Pre-launch content marketing and ghostwriting for Tensorlake's flagship product, Indexify—a data infrastructure platform that ingests unstructured data (videos, podcasts, PDFs) and enables semantic search at scale. 
   
   Founded by former FAANG engineers, Indexify bridges the gap between LLM prototypes and production-ready applications through real-time extraction pipelines and multi-modal data processing. 
@@ -15,8 +15,14 @@ const project: Project = {
 `,
   credits: [
     { role: "Author", name: "Joseph Gleasure" },
-    { role: "Client", name: "Tensorlake, Diptanu Choudhury" },
-    { role: "URL", name: "[Announcing Indexify](https://medium.com/tensorlake-ai/announcing-indexify-a36f69967884)" }
+    { role: "Client", name: "Cold Archive, Hypebeast, Lacoste"},
+    { role: "URL", name: "[Stranger Things](https://hypebeast.com/2023/4/lacoste-netflix-stranger-things-cold-archive-campaign)" }
+  ],
+  media: [
+    new URL("./1 (1).jpg", import.meta.url).href,
+    new URL("./1 (2).jpg", import.meta.url).href,
+    new URL("./1 (3).jpg", import.meta.url).href,
+
   ],
   body: `
 

@@ -24,9 +24,9 @@ const gridMask: ("empty" | "outline" | "solid" | "project")[][] = [
   ["empty", "outline", "project", "project", "solid", "project", "outline", "solid", "project", "solid", "project", "outline"],
 ];
 
-const getThumbUrl = (id: string) => {
+const getThumbUrl = (id: string, extension: 'jpg' | 'png' = 'jpg') => {
   // This may 404 if the specific thumbnail doesn't exist; we swap to a real fallback in onError.
-  return new URL(`../assets/thumbnails/${id}.jpg`, import.meta.url).href;
+  return new URL(`../assets/thumbnails/${id}.${extension}`, import.meta.url).href;
 };
 
 const ProjectGrid: React.FC<ProjectGridProps> = ({
@@ -266,19 +266,56 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
                     alt={cellStamp.name}
                     className="thumb"
                     loading="lazy"
+                    data-format-tried="jpg"
                     onLoad={(e) => {
                       e.currentTarget.classList.add("loaded");
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) parent.classList.add("media-loaded");
+                      // Go up two levels: img -> project-tile -> grid-cell.project
+                      const tile = e.currentTarget.parentElement;
+                      const cell = tile?.parentElement;
+                      if (cell) cell.classList.add("media-loaded");
                     }}
                     onError={(e) => {
-                      // Swap to a guaranteed-present placeholder, instead of hiding.
                       const img = e.currentTarget;
-                      img.onerror = null; // prevent loops
-                      img.src = fallbackThumbUrl;
-                      img.style.display = "";
-                      const parent = img.parentElement;
-                      if (parent) parent.classList.add("media-error");
+                      const formatTried = img.getAttribute('data-format-tried');
+                      // Go up two levels: img -> project-tile -> grid-cell.project
+                      const tile = img.parentElement;
+                      const cell = tile?.parentElement;
+                      
+                      // Try PNG if JPG failed
+                      if (formatTried === 'jpg') {
+                        img.onerror = null; // prevent loops
+                        img.setAttribute('data-format-tried', 'png');
+                        img.src = getThumbUrl(cellStamp.id, 'png');
+                        img.onerror = () => {
+                          // If PNG also fails, use fallback
+                          img.onerror = null;
+                          img.src = fallbackThumbUrl;
+                          img.style.display = "";
+                          if (cell) {
+                            cell.classList.add("media-error");
+                            cell.classList.add("media-loaded"); // Stop shimmer animation
+                          }
+                          // Ensure fallback image also triggers loaded state
+                          img.onload = () => {
+                            img.classList.add("loaded");
+                            if (cell) cell.classList.add("media-loaded");
+                          };
+                        };
+                      } else {
+                        // PNG also failed or already tried, use fallback
+                        img.onerror = null;
+                        img.src = fallbackThumbUrl;
+                        img.style.display = "";
+                        if (cell) {
+                          cell.classList.add("media-error");
+                          cell.classList.add("media-loaded"); // Stop shimmer animation
+                        }
+                        // Ensure fallback image also triggers loaded state
+                        img.onload = () => {
+                          img.classList.add("loaded");
+                          if (cell) cell.classList.add("media-loaded");
+                        };
+                      }
                     }}
                   />
                 </div>
