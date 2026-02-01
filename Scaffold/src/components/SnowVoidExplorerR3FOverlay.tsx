@@ -51,8 +51,18 @@ const SnowVoidExplorerR3FOverlay: React.FC<Props> = ({ open, onClose }) => {
   const crossArm = 2.6; // keep in sync with InfinityCross/CrossParticles.tsx ARM_LENGTH
   const crossCenterY = groundY + crossArm / 2;
 
+  // 2hollis - Flash (official video); autoplay when overlay opens (user already clicked)
+  const FLASH_EMBED = 'https://www.youtube.com/embed/CjnFzPhM72I?autoplay=1';
+
   return (
     <div ref={overlayRef} className="snow-void-overlay" tabIndex={-1} role="dialog" aria-modal="true">
+      <iframe
+        className="snow-void-audio"
+        src={FLASH_EMBED}
+        title="2hollis – Flash"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
       <Canvas camera={{ position: [0, crossCenterY + 0.6, 4.2], fov: 92 }}>
         <color attach="background" args={['#0a0a0c']} />
         {/* White snowy fog to create infinite horizon */}

@@ -587,6 +587,18 @@ button:focus-visible {
 .snow-void-overlay:active {
   cursor: grabbing;
 }
+/* 2hollis Flash – small corner player when snow easter egg is open */
+.snow-void-audio {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 280px;
+  height: 157px;
+  border: none;
+  border-radius: 8px;
+  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
 .snow-void-canvas {
   width: 100%;
   height: 100%;

@@ -143,7 +143,7 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
     return delays;
   }, []);
 
-  // Snow presents can appear only on solid/outline cells (never on project cells)
+  // Snow view: only one present (random solid/outline cell); rest stay as outlines
   const presentByCell = useMemo(() => {
     const map = new Map<string, string>();
     if (!snowPresentUrls || snowSeed == null) return map;
@@ -156,19 +156,21 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
     };
     const rand = mulberry32(snowSeed >>> 0);
 
+    const candidateKeys: string[] = [];
     for (let rr = 0; rr < rows; rr++) {
       for (let cc = 0; cc < cols; cc++) {
-        const key = `cell-${rr}-${cc}`;
         const type = gridMask[rr]?.[cc] ?? "empty";
-
         const isGrey = type === "solid" || type === "outline";
         const isProjectSlot = type === "project";
         if (!isGrey || isProjectSlot) continue;
-
-        const idx = rand() < 0.5 ? 0 : 1;
-        map.set(key, snowPresentUrls[idx]);
+        candidateKeys.push(`cell-${rr}-${cc}`);
       }
     }
+    if (candidateKeys.length === 0) return map;
+    const pick = Math.floor(rand() * candidateKeys.length) % candidateKeys.length;
+    const oneKey = candidateKeys[pick];
+    const idx = rand() < 0.5 ? 0 : 1;
+    map.set(oneKey, snowPresentUrls[idx]);
     return map;
   }, [snowPresentUrls?.[0], snowPresentUrls?.[1], snowSeed]);
 
